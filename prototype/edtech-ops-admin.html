@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>教培运营后台 · 交互规范版</title>
+  <style>
+    :root {
+      --brand: #165dff;
+      --bg: #f5f7fb;
+      --line: #e5e6eb;
+      --text: #1d2129;
+      --muted: #86909c;
+      --ok: #00b42a;
+      --warn: #ff7d00;
+      --bad: #f53f3f;
+      --side: #1d2536;
+      --side-2: #232d40;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .app { display: flex; min-height: 100vh; }
+    .side {
+      width: 228px;
+      background: var(--side);
+      color: #fff;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand {
+      padding: 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .menu-root { padding: 8px; }
+    .menu-group { margin-bottom: 4px; }
+    .menu-parent {
+      width: 100%;
+      border: 0;
+      color: #e6e8ee;
+      background: transparent;
+      text-align: left;
+      padding: 10px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .menu-parent:hover { background: rgba(255,255,255,.08); }
+    .menu-parent .left { display: inline-flex; align-items: center; gap: 8px; }
+    .arrow { transition: transform .2s; color: #9ea7ba; }
+    .menu-group.open .arrow { transform: rotate(90deg); }
+    .submenu { display: none; margin: 4px 0 6px 0; }
+    .menu-group.open .submenu { display: block; }
+    .menu-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #d4d8e2;
+      text-align: left;
+      padding: 8px 12px 8px 34px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .menu-item:hover { background: rgba(255,255,255,.08); }
+    .menu-item.active {
+      color: var(--brand);
+      background: #fff;
+      font-weight: 600;
+    }
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .head {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      font-weight: 600;
+    }
+    .panel { margin: 14px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+    .filters { padding: 14px; border-bottom: 1px solid var(--line); }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+    .more { margin-top: 10px; display: none; }
+    .more.show { display: flex; }
+    .fi { min-width: 140px; }
+    .fi label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+    .fi input,.fi select {
+      width: 100%;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--text);
+    }
+    .actions { margin-left: auto; display: flex; gap: 8px; }
+    .btn {
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      padding: 0 14px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .btn-link {
+      border: 0;
+      background: transparent;
+      color: var(--brand);
+      padding: 0;
+      cursor: pointer;
+    }
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+    thead th {
+      background: #f7f8fa;
+      font-weight: 600;
+      text-align: left;
+      color: #4e5969;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #f2f3f5;
+      white-space: nowrap;
+    }
+    tbody tr:hover td { background: #f5f8ff; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot.ok { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .dot.bad { background: var(--bad); }
+    .op {
+      color: var(--brand);
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      margin-right: 10px;
+      padding: 0;
+    }
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #4e5969;
+    }
+    .p-right { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pg {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 4px;
+      min-width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+    .pg.active {
+      color: #fff;
+      border-color: var(--brand);
+      background: var(--brand);
+    }
+    .pg:disabled { opacity: .45; cursor: not-allowed; }
+    .goto {
+      width: 56px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 20px;
+      background: #1d2129;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: .2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .modal-mask.show { display: flex; }
+    .modal {
+      width: 520px;
+      max-width: calc(100vw - 32px);
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .modal.modal-wide {
+      width: 760px;
+    }
+    .modal-hd {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 600;
+    }
+    .modal-bd {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-height: min(72vh, 640px);
+      overflow-y: auto;
+    }
+    .form-section {
+      grid-column: 1 / -1;
+      font-weight: 600;
+      color: #4e5969;
+      font-size: 13px;
+      margin: 4px 0 2px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+    .form-section:first-child {
+      border-top: 0;
+      padding-top: 0;
+      margin-top: 0;
+    }
+    .fi.full {
+      grid-column: 1 / -1;
+    }
+    .fi .hint {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+    .modal-ft {
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">教培运营后台</div>
+      <div class="menu-root" id="menu-root"></div>
+    </aside>
+    <main class="main">
+      <div class="head" id="page-title">多租户管理</div>
+      <section class="panel">
+        <div class="filters">
+          <div class="row" id="base-filters"></div>
+          <div class="row more" id="more-filters"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr id="thead-row"></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <div id="pager-info"></div>
+          <div class="p-right">
+            <label>每页</label>
+            <select id="page-size" class="pg">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+            </select>
+            <button class="pg" id="prev">‹</button>
+            <div id="page-list"></div>
+            <button class="pg" id="next">›</button>
+            <span>前往</span>
+            <input id="goto-input" class="goto" />
+            <button class="pg" id="goto-btn">GO</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="modal-mask" id="editor-mask">
+    <div class="modal">
+      <div class="modal-hd" id="editor-title">新增</div>
+      <div class="modal-bd" id="editor-fields"></div>
+      <div class="modal-ft">
+        <button class="btn" id="editor-cancel">取消</button>
+        <button class="btn btn-primary" id="editor-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const menus = [
+      { label: "多租户管理", icon: "🏢", open: true, children: ["多租户管理", "机构入驻审核"] },
+      { label: "账号权限管理", icon: "👥", open: true, children: ["运营账号管理", "学生账号管理"] },
+      { label: "数据监控", icon: "📊", open: false, children: ["上报与管控", "登录安全审计"] }
+    ];
+
+    const moduleDefs = {
+      "多租户管理": {
+        dateField: "createDate",
+        filters: [
+          { k: "org", t: "text", l: "机构名称", p: "请输入机构名" },
+          { k: "tenantId", t: "text", l: "租户ID", p: "请输入租户ID" },
+          { k: "status", t: "select", l: "机构状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "city", t: "text", l: "城市", p: "请输入城市" },
+          { k: "admin", t: "text", l: "管理员", p: "请输入管理员" },
+          { k: "from", t: "date", l: "创建时间起" },
+          { k: "to", t: "date", l: "创建时间止" }
+        ],
+        columns: ["租户ID", "机构名称", "管理员", "手机号", "城市", "创建时间", "状态", "操作"],
+        rows: sampleRows("tenant")
+      },
+      "机构入驻审核": {
+        dateField: "date",
+        filters: [
+          { k: "org", t: "text", l: "机构名称", p: "请输入机构名" },
+          { k: "admin", t: "text", l: "申请人", p: "请输入申请人" },
+          { k: "status", t: "select", l: "审核状态", o: ["全部", "待审核", "正常", "已封禁"] },
+          { k: "city", t: "text", l: "城市", p: "请输入城市" },
+          { k: "from", t: "date", l: "申请时间起" },
+          { k: "to", t: "date", l: "申请时间止" }
+        ],
+        columns: ["信息ID", "机构名称", "申请人", "手机号", "证件号", "申请时间", "状态", "操作"],
+        rows: sampleRows("audit")
+      },
+      "运营账号管理": {
+        dateField: "createDate",
+        filters: [
+          { k: "name", t: "text", l: "用户姓名", p: "请输入姓名" },
+          { k: "login", t: "text", l: "登录账号", p: "请输入账号" },
+          { k: "status", t: "select", l: "账号状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "role", t: "select", l: "角色", o: ["全部", "运营管理员", "普通运营", "审核员"] },
+          { k: "phone", t: "text", l: "手机号", p: "请输入手机号" },
+          { k: "from", t: "date", l: "创建时间起" },
+          { k: "to", t: "date", l: "创建时间止" }
+        ],
+        columns: ["信息ID", "用户姓名", "登录账号", "手机号", "角色", "创建时间", "最近登录", "状态", "操作"],
+        rows: sampleRows("ops")
+      },
+      "学生账号管理": {
+        dateField: "date",
+        filters: [
+          { k: "name", t: "text", l: "用户姓名", p: "请输入用户姓名" },
+          { k: "login", t: "text", l: "登录账号", p: "请输入登录账号" },
+          { k: "phone", t: "text", l: "手机号", p: "请输入手机号" },
+          { k: "status", t: "select", l: "账号状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "stage", t: "select", l: "学段", o: ["全部", "小学", "初中", "高中"] },
+          { k: "province", t: "select", l: "省份", o: ["全部", "北京", "上海", "浙江", "四川"] },
+          { k: "from", t: "date", l: "注册时间起" },
+          { k: "to", t: "date", l: "注册时间止" }
+        ],
+        columns: ["信息ID", "用户姓名", "登录账号", "手机号", "省份", "学段", "注册时间", "状态", "操作"],
+        rows: sampleRows("student")
+      },
+      "上报与管控": {
+        dateField: "deadline",
+        filters: [
+          { k: "org", t: "text", l: "机构名称", p: "请输入机构名" },
+          { k: "period", t: "select", l: "上报周期", o: ["全部", "周报", "月报"] },
+          { k: "status", t: "select", l: "上报状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "from", t: "date", l: "截止时间起" },
+          { k: "to", t: "date", l: "截止时间止" }
+        ],
+        columns: ["信息ID", "机构", "负责人", "手机号", "上报周期", "截止时间", "状态", "操作"],
+        rows: sampleRows("report")
+      },
+      "登录安全审计": {
+        dateField: "loginDate",
+        filters: [
+          { k: "login", t: "text", l: "登录账号", p: "请输入账号" },
+          { k: "name", t: "text", l: "用户名", p: "请输入用户名" },
+          { k: "status", t: "select", l: "登录状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "from", t: "date", l: "登录时间起" },
+          { k: "to", t: "date", l: "登录时间止" }
+        ],
+        columns: ["信息ID", "账号", "用户名", "登录IP", "终端", "登录时间", "状态", "操作"],
+        rows: sampleRows("log")
+      }
+    };
+
+    let activeModule = "多租户管理";
+    let page = 1;
+    let pageSize = 10;
+    let filteredRows = [];
+    const filters = {};
+    let editingId = null;
+
+    function sampleRows(type) {
+      const sts = ["正常", "待审核", "已封禁"];
+      const orgs = ["格斯兰德英语", "星火课后成长中心", "慧语外语工作室", "东方少儿口才"];
+      const names = ["李昀锦", "王浩", "周小满", "刘梓萱"];
+      const base = [];
+      for (let i = 1; i <= 10; i += 1) {
+        const s = sts[i % 3];
+        const d = `2026-04-${String(10 + i).padStart(2, "0")} 14:30`;
+        const adminName = ["张老师", "李老师", "王敏", "周磊"][i % 4];
+        const phone = `1886005${String(9000 + i).slice(-4)}`;
+        const province = ["北京", "上海", "浙江", "四川"][i % 4];
+        const city = ["北京", "上海", "杭州", "成都"][i % 4];
+        const district = ["朝阳区", "海淀区", "西湖区", "武侯区"][i % 4];
+        base.push({
+          id: `${type.toUpperCase()}-${3000 + i}`,
+          tenantId: `TNT-${String(100 + i)}`,
+          org: orgs[i % 4],
+          orgShort: `${orgs[i % 4].slice(0, 2)}简称`,
+          orgEn: i % 2 === 0 ? `Demo Org ${i}` : "",
+          orgLogo: `https://cdn.demo/logo-${i}.png`,
+          province,
+          city,
+          district,
+          address: `科技园路 ${100 + i} 号`,
+          establishedAt: `201${(i % 9) + 1}-0${(i % 8) + 1}-15`,
+          contactName: adminName,
+          contactPhone: phone,
+          landline: i % 3 === 0 ? "010-88886666" : "",
+          email: `contact_${100 + i}@demo-inst.edu`,
+          title: ["校长", "负责人", "运营主管"][i % 3],
+          wechat: `wx_inst_${200 + i}`,
+          bizLicense: `https://cdn.demo/license-${i}.pdf`,
+          creditCode: `91110108MA0${String(100000 + i).padStart(6, "0")}X`,
+          legalName: ["赵明", "钱华", "孙芳", "李强"][i % 4],
+          legalIdFront: `https://cdn.demo/id-front-${i}.jpg`,
+          legalIdBack: `https://cdn.demo/id-back-${i}.jpg`,
+          bankInfo: `https://cdn.demo/bank-${i}.pdf`,
+          venuePhotos: `https://cdn.demo/venue-${i}-a.jpg,https://cdn.demo/venue-${i}-b.jpg`,
+          name: names[i % 4],
+          login: `${type}_user_${100 + i}`,
+          phone,
+          stage: ["小学", "初中", "高中"][i % 3],
+          role: ["运营管理员", "普通运营", "审核员"][i % 3],
+          cert: `3456789${String(765412345 + i)}`,
+          status: s,
+          admin: adminName,
+          ip: `106.12.${20 + i}.${100 + i}`,
+          terminal: ["Chrome", "Edge", "Safari"][i % 3],
+          period: ["月报", "周报"][i % 2],
+          deadline: `2026-05-${String(10 + i).padStart(2, "0")} 18:00`,
+          date: d,
+          createDate: d,
+          loginDate: d
+        });
+      }
+      return base;
+    }
+
+    function getColumnValue(col, r) {
+      const map = {
+        "租户ID": r.tenantId,
+        "机构名称": r.org,
+        "管理员": r.admin,
+        "城市": r.city,
+        "创建时间": r.createDate,
+        "信息ID": r.id,
+        "申请人": r.admin,
+        "证件号": r.cert,
+        "申请时间": r.date,
+        "用户姓名": r.name,
+        "登录账号": r.login,
+        "角色": r.role,
+        "最近登录": r.loginDate,
+        "注册时间": r.date,
+        "省份": r.province,
+        "学段": r.stage,
+        "机构": r.org,
+        "负责人": r.admin,
+        "上报周期": r.period,
+        "截止时间": r.deadline,
+        "账号": r.login,
+        "用户名": r.name,
+        "登录IP": r.ip,
+        "终端": r.terminal,
+        "登录时间": r.loginDate
+      };
+      if (col === "状态") return statusCell(r.status);
+      if (col === "操作") {
+        return `<button class="op" data-op="编辑" data-id="${r.id}">编辑</button><button class="op" data-op="实时数据" data-id="${r.id}">实时数据</button><button class="op" data-op="重点监控" data-id="${r.id}">重点监控</button>`;
+      }
+      return map[col] || "";
+    }
+
+    function escAttr(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;");
+    }
+
+    function editorFieldValue(row, k) {
+      if (!row) return "";
+      if (k === "contactName") return row.contactName || row.admin || "";
+      if (k === "contactPhone") return row.contactPhone || row.phone || "";
+      return row[k] ?? "";
+    }
+
+    function getEditableFields() {
+      const byModule = {
+        "多租户管理": [
+          { type: "section", title: "一、基础信息（必填）" },
+          { k: "org", l: "机构名称", t: "text", r: true, p: "与营业执照一致" },
+          { k: "orgShort", l: "机构简称", t: "text", r: true, p: "对外展示用" },
+          { k: "orgEn", l: "机构英文名称", t: "text", r: false, p: "可选" },
+          { k: "orgLogo", l: "机构LOGO", t: "file", r: true, p: "上传图片或填写可访问地址（原型）" },
+          { k: "province", l: "省", t: "select", o: ["北京", "上海", "浙江", "广东", "四川"], r: true },
+          { k: "city", l: "市", t: "select", o: ["北京", "上海", "杭州", "成都", "深圳", "广州"], r: true },
+          { k: "district", l: "区", t: "select", o: ["朝阳区", "海淀区", "浦东新区", "西湖区", "武侯区"], r: true },
+          { k: "address", l: "详细地址", t: "text", r: true, full: true, p: "街道门牌等" },
+          { k: "establishedAt", l: "成立时间", t: "date", r: true },
+          { type: "section", title: "二、联系人信息（超级重要）" },
+          { k: "contactName", l: "联系人姓名", t: "text", r: true },
+          { k: "contactPhone", l: "联系电话", t: "text", r: true, p: "11 位手机号" },
+          { k: "landline", l: "固定电话", t: "text", r: false, p: "可选，含区号" },
+          { k: "email", l: "邮箱", t: "text", r: true },
+          { k: "title", l: "职务", t: "select", o: ["校长", "负责人", "运营主管"], r: true },
+          { k: "wechat", l: "微信号", t: "text", r: true },
+          { type: "section", title: "三、资质证件（必须上传）" },
+          { k: "bizLicense", l: "营业执照", t: "file", r: true, p: "扫描件或存储地址（原型）" },
+          { k: "creditCode", l: "统一社会信用代码", t: "text", r: true },
+          { k: "legalName", l: "法人姓名", t: "text", r: true },
+          { k: "legalIdFront", l: "法人身份证（人像面）", t: "file", r: true, p: "正面上传" },
+          { k: "legalIdBack", l: "法人身份证（国徽面）", t: "file", r: true, p: "反面上传" },
+          { k: "bankInfo", l: "开户许可证 / 对公账户信息", t: "file", r: true, p: "许可证或开户证明" },
+          { k: "venuePhotos", l: "办学场地照片（室内环境）", t: "file", r: true, p: "可多图时填写多个地址，逗号分隔" },
+          { k: "status", l: "状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+        ],
+        "机构入驻审核": [
+          { k: "org", l: "机构名称", t: "text", r: true },
+          { k: "admin", l: "申请人", t: "text", r: true },
+          { k: "phone", l: "手机号", t: "text", r: true },
+          { k: "cert", l: "证件号", t: "text", r: true },
+          { k: "status", l: "审核状态", t: "select", o: ["待审核", "正常", "已封禁"], r: true }
+        ],
+        "运营账号管理": [
+          { k: "name", l: "用户姓名", t: "text", r: true },
+          { k: "login", l: "登录账号", t: "text", r: true },
+          { k: "phone", l: "手机号", t: "text", r: true },
+          { k: "role", l: "角色", t: "select", o: ["运营管理员", "普通运营", "审核员"], r: true },
+          { k: "status", l: "账号状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+        ],
+        "学生账号管理": [
+          { k: "name", l: "学生姓名", t: "text", r: true },
+          { k: "login", l: "登录账号", t: "text", r: true },
+          { k: "phone", l: "手机号", t: "text", r: true },
+          { k: "province", l: "省份", t: "select", o: ["北京", "上海", "浙江", "四川"], r: true },
+          { k: "stage", l: "学段", t: "select", o: ["小学", "初中", "高中"], r: true },
+          { k: "status", l: "账号状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+        ],
+        "上报与管控": [
+          { k: "org", l: "机构名称", t: "text", r: true },
+          { k: "admin", l: "负责人", t: "text", r: true },
+          { k: "phone", l: "手机号", t: "text", r: true },
+          { k: "period", l: "上报周期", t: "select", o: ["周报", "月报"], r: true },
+          { k: "deadline", l: "截止时间", t: "text", r: true },
+          { k: "status", l: "状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+        ],
+        "登录安全审计": [
+          { k: "login", l: "登录账号", t: "text", r: true },
+          { k: "name", l: "用户名", t: "text", r: true },
+          { k: "ip", l: "登录IP", t: "text", r: true },
+          { k: "terminal", l: "终端", t: "select", o: ["Chrome", "Edge", "Safari"], r: true },
+          { k: "status", l: "登录状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+        ]
+      };
+      return byModule[activeModule] || [];
+    }
+
+    function openEditor(row) {
+      editingId = row ? row.id : null;
+      const tenantUi = activeModule === "多租户管理";
+      document.getElementById("editor-title").textContent = tenantUi
+        ? (row ? "编辑机构" : "新增机构")
+        : (row ? `编辑 · ${activeModule}` : `新增 · ${activeModule}`);
+      const modalEl = document.querySelector("#editor-mask .modal");
+      if (activeModule === "多租户管理") modalEl.classList.add("modal-wide");
+      else modalEl.classList.remove("modal-wide");
+
+      const fields = getEditableFields();
+      document.getElementById("editor-fields").innerHTML = fields.map(f => {
+        if (f.type === "section") {
+          return `<div class="form-section">${f.title}</div>`;
+        }
+        const req = f.r ? " *" : "";
+        const fullCls = f.full ? " full" : "";
+        const v0 = escAttr(editorFieldValue(row, f.k));
+        if (f.t === "select") {
+          const cur = editorFieldValue(row, f.k);
+          const opts = f.o.map(o => `<option value="${escAttr(o)}" ${cur === o ? "selected" : ""}>${o}</option>`).join("");
+          return `<div class="fi${fullCls}"><label>${f.l}${req}</label><select data-ek="${f.k}" data-required="${f.r ? "1" : "0"}">${opts}</select></div>`;
+        }
+        if (f.t === "date") {
+          const dv = v0.length >= 10 ? v0.slice(0, 10) : v0;
+          return `<div class="fi${fullCls}"><label>${f.l}${req}</label><input type="date" data-ek="${f.k}" data-required="${f.r ? "1" : "0"}" value="${dv}" /></div>`;
+        }
+        if (f.t === "file") {
+          const ph = f.p ? `<span class="hint">${f.p}</span>` : "";
+          return `<div class="fi${fullCls}"><label>${f.l}${req}</label><input data-ek="${f.k}" data-required="${f.r ? "1" : "0"}" placeholder="${escAttr(f.p || "上传或填写地址")}" value="${v0}" />${ph}</div>`;
+        }
+        const ph = f.p ? `<span class="hint">${f.p}</span>` : "";
+        return `<div class="fi${fullCls}"><label>${f.l}${req}</label><input data-ek="${f.k}" data-required="${f.r ? "1" : "0"}" placeholder="${escAttr(f.p || "")}" value="${v0}" />${ph}</div>`;
+      }).join("");
+      document.getElementById("editor-mask").classList.add("show");
+    }
+
+    function saveEditor() {
+      const payload = {};
+      const inputs = Array.from(document.querySelectorAll("[data-ek]"));
+      for (const i of inputs) {
+        const v = i.value.trim();
+        const required = i.dataset.required === "1";
+        if (required && !v) {
+          return toast("请完善必填字段");
+        }
+        const ek = i.dataset.ek;
+        if ((ek === "phone" || ek === "contactPhone") && v && !/^1\d{10}$/.test(v)) {
+          return toast("手机号格式不正确");
+        }
+        if (ek === "email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+          return toast("邮箱格式不正确");
+        }
+        if (ek === "ip" && v && !/^\d{1,3}(\.\d{1,3}){3}$/.test(v)) {
+          return toast("IP 格式不正确");
+        }
+        payload[i.dataset.ek] = v;
+      }
+      if (activeModule === "多租户管理") {
+        if (payload.contactName) payload.admin = payload.contactName;
+        if (payload.contactPhone) payload.phone = payload.contactPhone;
+      }
+      const rows = moduleDefs[activeModule].rows;
+      const isEdit = !!editingId;
+      if (editingId) {
+        const t = rows.find(r => r.id === editingId);
+        if (t) Object.assign(t, payload);
+      } else {
+        const id = `${activeModule.slice(0, 2).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`;
+        const now = "2026-04-26 22:00";
+        rows.unshift({
+          id,
+          tenantId: payload.tenantId || `TNT-${Math.floor(Math.random() * 900 + 100)}`,
+          org: payload.org || "新建机构",
+          admin: payload.admin || "待分配",
+          name: payload.name || "新用户",
+          login: payload.login || `new_user_${Math.floor(Math.random() * 900 + 100)}`,
+          phone: payload.phone || "18800000000",
+          city: "北京",
+          cert: "345678976541234500",
+          role: payload.role || "普通运营",
+          period: payload.period || "月报",
+          deadline: payload.deadline || "2026-05-30 18:00",
+          ip: payload.ip || "106.12.88.100",
+          terminal: payload.terminal || "Chrome",
+          date: now,
+          createDate: now,
+          loginDate: now,
+          ...payload
+        });
+      }
+      document.getElementById("editor-mask").classList.remove("show");
+      editingId = null;
+      applyFilters();
+      renderTable();
+      toast(isEdit ? "已保存编辑" : "已新增数据");
+    }
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el.t);
+      el.t = setTimeout(() => el.classList.remove("show"), 1500);
+    }
+
+    function statusCell(s) {
+      const c = s === "正常" ? "ok" : s === "待审核" ? "warn" : "bad";
+      return `<span class="status"><i class="dot ${c}"></i>${s}</span>`;
+    }
+
+    function buildMenu() {
+      const root = document.getElementById("menu-root");
+      root.innerHTML = menus.map((g, gi) => `
+        <div class="menu-group ${g.open ? "open" : ""}" data-gi="${gi}">
+          <button class="menu-parent"><span class="left"><span>${g.icon}</span><span>${g.label}</span></span><span class="arrow">›</span></button>
+          <div class="submenu">
+            ${g.children.map(c => `<button class="menu-item ${c === activeModule ? "active" : ""}" data-module="${c}"><span>◻</span><span>${c}</span></button>`).join("")}
+          </div>
+        </div>`).join("");
+
+      root.querySelectorAll(".menu-parent").forEach(btn => {
+        btn.onclick = () => btn.closest(".menu-group").classList.toggle("open");
+      });
+      root.querySelectorAll(".menu-item").forEach(btn => {
+        btn.onclick = () => {
+          activeModule = btn.dataset.module;
+          page = 1;
+          Object.keys(filters).forEach(k => delete filters[k]);
+          render();
+        };
+      });
+    }
+
+    function buildFilters() {
+      const defs = moduleDefs[activeModule].filters;
+      const base = document.getElementById("base-filters");
+      const more = document.getElementById("more-filters");
+      const first = defs.slice(0, 4);
+      const extra = defs.slice(4);
+      base.innerHTML = filterItems(first) + actionButtons(extra.length > 0);
+      more.innerHTML = filterItems(extra);
+      more.classList.remove("show");
+
+      base.querySelectorAll("[data-k]").forEach(bindFilterInput);
+      more.querySelectorAll("[data-k]").forEach(bindFilterInput);
+
+      document.getElementById("btn-add").onclick = () => openEditor(null);
+      document.getElementById("btn-query").onclick = () => { page = 1; applyFilters(); renderTable(); };
+      document.getElementById("btn-reset").onclick = () => {
+        Object.keys(filters).forEach(k => delete filters[k]);
+        document.querySelectorAll("[data-k]").forEach(i => { i.value = ""; });
+        page = 1;
+        applyFilters();
+        renderTable();
+      };
+      const tg = document.getElementById("btn-toggle");
+      if (tg) {
+        tg.onclick = () => {
+          more.classList.toggle("show");
+          tg.textContent = more.classList.contains("show") ? "收起筛选" : "展开更多";
+        };
+      }
+    }
+
+    function filterItems(items) {
+      return items.map(f => {
+        if (f.t === "select") {
+          return `<div class="fi"><label>${f.l}</label><select data-k="${f.k}"><option value="">全部</option>${f.o.filter(x => x !== "全部").map(o => `<option value="${o}">${o}</option>`).join("")}</select></div>`;
+        }
+        return `<div class="fi"><label>${f.l}</label><input data-k="${f.k}" type="${f.t}" placeholder="${f.p || ""}" /></div>`;
+      }).join("");
+    }
+
+    function actionButtons(hasMore) {
+      const addLabel = activeModule === "多租户管理" ? "新增机构" : "新增";
+      return `<div class="actions">
+        ${hasMore ? '<button class="btn" id="btn-toggle">展开更多</button>' : ""}
+        <button class="btn" id="btn-add">${addLabel}</button>
+        <button class="btn btn-primary" id="btn-query">查询</button>
+        <button class="btn" id="btn-reset">重置</button>
+      </div>`;
+    }
+
+    function bindFilterInput(input) {
+      input.value = filters[input.dataset.k] || "";
+      input.oninput = input.onchange = () => { filters[input.dataset.k] = input.value.trim(); };
+    }
+
+    function applyFilters() {
+      const def = moduleDefs[activeModule];
+      const rows = def.rows;
+      const dateField = def.dateField || "date";
+      filteredRows = rows.filter(r => {
+        return Object.entries(filters).every(([k, v]) => {
+          if (!v) return true;
+          if (k === "from") return String(r[dateField] || "") >= v;
+          if (k === "to") return String(r[dateField] || "") <= `${v} 23:59`;
+          return String(r[k] || "").includes(v);
+        });
+      });
+    }
+
+    function renderTable() {
+      const def = moduleDefs[activeModule];
+      const h = document.getElementById("thead-row");
+      h.innerHTML = def.columns.map(c => `<th>${c}</th>`).join("");
+
+      const start = (page - 1) * pageSize;
+      const list = filteredRows.slice(start, start + pageSize);
+      document.getElementById("tbody").innerHTML = list.map(r => {
+        const cols = def.columns.map(c => getColumnValue(c, r));
+        return `<tr>${cols.map(c => `<td>${c}</td>`).join("")}</tr>`;
+      }).join("");
+
+      document.querySelectorAll(".op").forEach(b => b.onclick = () => {
+        if (b.dataset.op === "编辑") {
+          const row = moduleDefs[activeModule].rows.find(r => r.id === b.dataset.id);
+          openEditor(row || null);
+          return;
+        }
+        toast(`${b.dataset.op}（${activeModule}）`);
+      });
+      renderPager();
+    }
+
+    function renderPager() {
+      const total = filteredRows.length;
+      const pages = Math.max(1, Math.ceil(total / pageSize));
+      if (page > pages) page = pages;
+      document.getElementById("pager-info").textContent = `共 ${total} 条`;
+      document.getElementById("page-list").innerHTML = Array.from({ length: pages }).map((_, i) => {
+        const p = i + 1;
+        return `<button class="pg ${p === page ? "active" : ""}" data-p="${p}">${p}</button>`;
+      }).join("");
+      document.querySelectorAll("#page-list .pg").forEach(b => b.onclick = () => { page = Number(b.dataset.p); renderTable(); });
+      document.getElementById("prev").disabled = page <= 1;
+      document.getElementById("next").disabled = page >= pages;
+      document.getElementById("prev").onclick = () => { if (page > 1) { page -= 1; renderTable(); } };
+      document.getElementById("next").onclick = () => { if (page < pages) { page += 1; renderTable(); } };
+    }
+
+    document.getElementById("page-size").onchange = e => {
+      pageSize = Number(e.target.value);
+      page = 1;
+      renderTable();
+    };
+    document.getElementById("goto-btn").onclick = () => {
+      const pages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+      const to = Number(document.getElementById("goto-input").value);
+      if (!to || to < 1 || to > pages) return toast("页码无效");
+      page = to;
+      renderTable();
+    };
+    document.getElementById("editor-cancel").onclick = () => {
+      document.getElementById("editor-mask").classList.remove("show");
+      editingId = null;
+    };
+    document.getElementById("editor-save").onclick = saveEditor;
+    document.getElementById("editor-mask").onclick = e => {
+      if (e.target.id === "editor-mask") {
+        document.getElementById("editor-mask").classList.remove("show");
+        editingId = null;
+      }
+    };
+
+    function render() {
+      buildMenu();
+      document.getElementById("page-title").textContent = activeModule;
+      buildFilters();
+      applyFilters();
+      renderTable();
+    }
+
+    render();
+  </script>
+</body>
+</html>
