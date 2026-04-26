@@ -1,0 +1,22 @@
+---
+description: Student app visual style for Teching prototypes
+alwaysApply: true
+---
+
+# Student App Visual Style
+
+When designing or editing this project’s student-facing app prototypes, follow the existing `prototype/student-app-v1.html` style.
+
+- Use a landscape-first mobile/tablet workspace. Keep the UI centered with generous blue background margins.
+- Use a bright sky-blue gradient background with subtle soft cloud/star atmosphere.
+- Use large white rounded cards for major sections. Cards should feel soft, clean, and child-friendly.
+- Keep the visual language soft, cute, positive, and education-oriented for primary to junior middle school students.
+- Prefer 3D flat icons with rounded edges, soft highlights, and light shadows. Use learning-related metaphors such as books, folders, checkmarks, calendars, pencils, microphones, stars, and bells.
+- Avoid complex decorations, sharp corners, dark-heavy palettes, and dense information.
+- For the home work area, keep a left personal-center card and a right study/check-in card.
+- For function entries, use the current hierarchy: `今日任务` as the prominent primary entry on the left; `打卡记录` and `任务中心` stacked on the right.
+- Do not show `跟读记录` unless the user explicitly asks to add it back.
+- Keep the top navigation lightweight: small circular icon buttons with labels, no bottom tab bar.
+- Use warm pale yellow/orange for reminder banners, and keep banners compact.
+- For the profile metrics, show only `打卡数` and `经验值` unless the user asks for more stats.
+- Preserve the current brand style: pill-shaped logo area with `格斯兰德英语` and an `英语` tag.
