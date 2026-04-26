@@ -324,8 +324,9 @@
 
   <script>
     const menus = [
-      { label: "多租户管理", icon: "🏢", open: true, children: ["多租户管理", "机构入驻审核"] },
-      { label: "账号权限管理", icon: "👥", open: true, children: ["运营账号管理", "学生账号管理"] },
+      { label: "多租户管理", icon: "🏢", open: true, children: ["多租户管理"] },
+      { label: "账号权限管理", icon: "👥", open: true, children: ["运营账号管理", "机构角色管理", "机构权限管理"] },
+      { label: "教学资源管理", icon: "📚", open: true, children: ["教材管理"] },
       { label: "数据监控", icon: "📊", open: false, children: ["上报与管控", "登录安全审计"] }
     ];
 
@@ -362,7 +363,7 @@
         filters: [
           { k: "name", t: "text", l: "用户姓名", p: "请输入姓名" },
           { k: "login", t: "text", l: "登录账号", p: "请输入账号" },
-          { k: "status", t: "select", l: "账号状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "status", t: "select", l: "账号状态", o: ["全部", "启用", "禁用"] },
           { k: "role", t: "select", l: "角色", o: ["全部", "运营管理员", "普通运营", "审核员"] },
           { k: "phone", t: "text", l: "手机号", p: "请输入手机号" },
           { k: "from", t: "date", l: "创建时间起" },
@@ -385,6 +386,46 @@
         ],
         columns: ["信息ID", "用户姓名", "登录账号", "手机号", "省份", "学段", "注册时间", "状态", "操作"],
         rows: sampleRows("student")
+      },
+      "机构角色管理": {
+        dateField: "createDate",
+        filters: [
+          { k: "org", t: "text", l: "机构名称", p: "请输入机构名" },
+          { k: "roleName", t: "text", l: "角色名称", p: "请输入角色名称" },
+          { k: "permGroup", t: "select", l: "关联权限组", o: ["全部", "机构管理员权限", "教务运营权限", "教师管理权限", "财务结算权限"] },
+          { k: "status", t: "select", l: "角色状态", o: ["全部", "启用", "禁用"] },
+          { k: "from", t: "date", l: "创建时间起" },
+          { k: "to", t: "date", l: "创建时间止" }
+        ],
+        columns: ["信息ID", "机构名称", "角色名称", "关联权限组", "角色成员数", "创建时间", "状态", "操作"],
+        rows: sampleRows("orgRole")
+      },
+      "机构权限管理": {
+        dateField: "updateTime",
+        filters: [
+          { k: "org", t: "text", l: "机构名称", p: "请输入机构名" },
+          { k: "permGroup", t: "text", l: "权限组", p: "请输入权限组" },
+          { k: "updatedBy", t: "text", l: "最近更新人", p: "请输入更新人" },
+          { k: "status", t: "select", l: "权限状态", o: ["全部", "启用", "禁用"] },
+          { k: "from", t: "date", l: "更新时间起" },
+          { k: "to", t: "date", l: "更新时间止" }
+        ],
+        columns: ["信息ID", "机构名称", "权限组", "权限项数量", "最近更新人", "更新时间", "状态", "操作"],
+        rows: sampleRows("orgPerm")
+      },
+      "教材管理": {
+        dateField: "updateTime",
+        filters: [
+          { k: "bookName", t: "text", l: "教材名称", p: "请输入教材名称" },
+          { k: "subject", t: "select", l: "学科", o: ["全部", "语文", "数学", "英语", "物理", "化学"] },
+          { k: "grade", t: "select", l: "适用学段", o: ["全部", "小学", "初中", "高中"] },
+          { k: "status", t: "select", l: "教材状态", o: ["全部", "正常", "待审核", "已封禁"] },
+          { k: "version", t: "text", l: "版本", p: "请输入版本" },
+          { k: "from", t: "date", l: "更新时间起" },
+          { k: "to", t: "date", l: "更新时间止" }
+        ],
+        columns: ["信息ID", "教材名称", "学科", "适用学段", "版本", "出版社", "更新时间", "状态", "操作"],
+        rows: sampleRows("textbook")
       },
       "上报与管控": {
         dateField: "deadline",
@@ -421,17 +462,27 @@
 
     function sampleRows(type) {
       const sts = ["正常", "待审核", "已封禁"];
+      const accountSts = ["启用", "禁用"];
       const orgs = ["格斯兰德英语", "星火课后成长中心", "慧语外语工作室", "东方少儿口才"];
       const names = ["李昀锦", "王浩", "周小满", "刘梓萱"];
       const base = [];
       for (let i = 1; i <= 10; i += 1) {
-        const s = sts[i % 3];
+        const s = (type === "ops" || type === "orgRole" || type === "orgPerm")
+          ? accountSts[i % 2]
+          : sts[i % 3];
         const d = `2026-04-${String(10 + i).padStart(2, "0")} 14:30`;
         const adminName = ["张老师", "李老师", "王敏", "周磊"][i % 4];
         const phone = `1886005${String(9000 + i).slice(-4)}`;
         const province = ["北京", "上海", "浙江", "四川"][i % 4];
         const city = ["北京", "上海", "杭州", "成都"][i % 4];
         const district = ["朝阳区", "海淀区", "西湖区", "武侯区"][i % 4];
+        const roleName = ["机构超级管理员", "教务主管", "班主任", "财务负责人"][i % 4];
+        const permGroup = ["机构管理员权限", "教务运营权限", "教师管理权限", "财务结算权限"][i % 4];
+        const updatedBy = ["平台运营-陈琳", "机构管理员-王浩", "超级管理员-李青", "平台审核-周宁"][i % 4];
+        const bookName = ["同步精讲语文", "核心数学训练", "英语阅读拓展", "科学探究实验"][i % 4];
+        const subject = ["语文", "数学", "英语", "物理"][i % 4];
+        const version = ["人教版", "北师大版", "苏教版", "沪教版"][i % 4];
+        const publisher = ["人民教育出版社", "北京师范大学出版社", "江苏教育出版社", "上海教育出版社"][i % 4];
         base.push({
           id: `${type.toUpperCase()}-${3000 + i}`,
           tenantId: `TNT-${String(100 + i)}`,
@@ -468,6 +519,17 @@
           ip: `106.12.${20 + i}.${100 + i}`,
           terminal: ["Chrome", "Edge", "Safari"][i % 3],
           period: ["月报", "周报"][i % 2],
+          roleName,
+          permGroup,
+          memberCount: String(2 + (i % 7)),
+          permCount: String(8 + i),
+          updatedBy,
+          bookName,
+          subject,
+          version,
+          publisher,
+          grade: ["小学", "初中", "高中"][i % 3],
+          updateTime: `2026-04-${String(12 + i).padStart(2, "0")} 16:20`,
           deadline: `2026-05-${String(10 + i).padStart(2, "0")} 18:00`,
           date: d,
           createDate: d,
@@ -498,6 +560,18 @@
         "机构": r.org,
         "负责人": r.admin,
         "上报周期": r.period,
+        "角色名称": r.roleName,
+        "关联权限组": r.permGroup,
+        "角色成员数": r.memberCount,
+        "权限组": r.permGroup,
+        "权限项数量": r.permCount,
+        "最近更新人": r.updatedBy,
+        "更新时间": r.updateTime,
+        "教材名称": r.bookName,
+        "学科": r.subject,
+        "适用学段": r.grade,
+        "版本": r.version,
+        "出版社": r.publisher,
         "截止时间": r.deadline,
         "账号": r.login,
         "用户名": r.name,
@@ -507,7 +581,7 @@
       };
       if (col === "状态") return statusCell(r.status);
       if (col === "操作") {
-        return `<button class="op" data-op="编辑" data-id="${r.id}">编辑</button><button class="op" data-op="实时数据" data-id="${r.id}">实时数据</button><button class="op" data-op="重点监控" data-id="${r.id}">重点监控</button>`;
+        return `<button class="op" data-op="编辑" data-id="${r.id}">编辑</button>`;
       }
       return map[col] || "";
     }
@@ -568,7 +642,7 @@
           { k: "login", l: "登录账号", t: "text", r: true },
           { k: "phone", l: "手机号", t: "text", r: true },
           { k: "role", l: "角色", t: "select", o: ["运营管理员", "普通运营", "审核员"], r: true },
-          { k: "status", l: "账号状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+          { k: "status", l: "账号状态", t: "select", o: ["启用", "禁用"], r: true }
         ],
         "学生账号管理": [
           { k: "name", l: "学生姓名", t: "text", r: true },
@@ -577,6 +651,28 @@
           { k: "province", l: "省份", t: "select", o: ["北京", "上海", "浙江", "四川"], r: true },
           { k: "stage", l: "学段", t: "select", o: ["小学", "初中", "高中"], r: true },
           { k: "status", l: "账号状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
+        ],
+        "机构角色管理": [
+          { k: "org", l: "机构名称", t: "text", r: true },
+          { k: "roleName", l: "角色名称", t: "text", r: true },
+          { k: "permGroup", l: "关联权限组", t: "select", o: ["机构管理员权限", "教务运营权限", "教师管理权限", "财务结算权限"], r: true },
+          { k: "memberCount", l: "角色成员数", t: "text", r: true },
+          { k: "status", l: "角色状态", t: "select", o: ["启用", "禁用"], r: true }
+        ],
+        "机构权限管理": [
+          { k: "org", l: "机构名称", t: "text", r: true },
+          { k: "permGroup", l: "权限组", t: "text", r: true },
+          { k: "permCount", l: "权限项数量", t: "text", r: true },
+          { k: "updatedBy", l: "最近更新人", t: "text", r: true },
+          { k: "status", l: "权限状态", t: "select", o: ["启用", "禁用"], r: true }
+        ],
+        "教材管理": [
+          { k: "bookName", l: "教材名称", t: "text", r: true },
+          { k: "subject", l: "学科", t: "select", o: ["语文", "数学", "英语", "物理", "化学"], r: true },
+          { k: "grade", l: "适用学段", t: "select", o: ["小学", "初中", "高中"], r: true },
+          { k: "version", l: "版本", t: "text", r: true },
+          { k: "publisher", l: "出版社", t: "text", r: true },
+          { k: "status", l: "教材状态", t: "select", o: ["正常", "待审核", "已封禁"], r: true }
         ],
         "上报与管控": [
           { k: "org", l: "机构名称", t: "text", r: true },
@@ -650,6 +746,9 @@
         if (ek === "email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
           return toast("邮箱格式不正确");
         }
+        if ((ek === "memberCount" || ek === "permCount") && v && !/^\d+$/.test(v)) {
+          return toast("数量字段需为数字");
+        }
         if (ek === "ip" && v && !/^\d{1,3}(\.\d{1,3}){3}$/.test(v)) {
           return toast("IP 格式不正确");
         }
@@ -679,6 +778,17 @@
           cert: "345678976541234500",
           role: payload.role || "普通运营",
           period: payload.period || "月报",
+          roleName: payload.roleName || "新建角色",
+          permGroup: payload.permGroup || "机构管理员权限",
+          memberCount: payload.memberCount || "1",
+          permCount: payload.permCount || "10",
+          updatedBy: payload.updatedBy || "当前操作人",
+          bookName: payload.bookName || "新教材",
+          subject: payload.subject || "语文",
+          grade: payload.grade || "初中",
+          version: payload.version || "人教版",
+          publisher: payload.publisher || "人民教育出版社",
+          updateTime: now,
           deadline: payload.deadline || "2026-05-30 18:00",
           ip: payload.ip || "106.12.88.100",
           terminal: payload.terminal || "Chrome",
@@ -704,7 +814,7 @@
     }
 
     function statusCell(s) {
-      const c = s === "正常" ? "ok" : s === "待审核" ? "warn" : "bad";
+      const c = (s === "正常" || s === "启用") ? "ok" : (s === "待审核") ? "warn" : "bad";
       return `<span class="status"><i class="dot ${c}"></i>${s}</span>`;
     }
 
